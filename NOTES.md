@@ -25,19 +25,7 @@ The project implements a basic distributed task scheduler using Netty for commun
 
 ## 2. Architecture & Logic Bugs
 
-### 2.1 Broken Load Balancing
-**Files:** `client/.../MonitoringService.java`, `server/.../WorkerStorage.java`
-- **Issue:** `MonitoringService` exists in the client but is **never used**. The client never sends CPU/Memory stats to the server.
-- **Impact:** The server's `WorkerInfo` objects always have default load values. `WorkerSelector` (using Power of Two Choices) effectively selects workers randomly, defeating the purpose of load balancing.
-- **Fix:** The client must periodically send a `HEARTBEAT` message containing `MonitorInfo`. The server must update `WorkerInfo` with these stats.
-
-### 2.2 Task Dispatch Crashes
-**Files:** `server/.../WorkerSelector.java`, `TaskDispatcher.java`
-- **Issue:** `WorkerSelector.selectWorker()` assumes `workers.size() > 0`.
-- **Impact:** If no workers are connected, `random.nextInt(size)` throws `IllegalArgumentException`, crashing the `TaskDispatcher` thread.
-- **Fix:** Check for empty worker list. If empty, queue the task or reject it until workers connect.
-
-### 2.3 One-Way Task Execution
+### 2.1 One-Way Task Execution
 **File:** `client/.../ClientHandler.java`
 - **Issue:** The client executes the task but **never reports the result** (success/failure/output) back to the server.
 - **Impact:** The server assumes the task is "assigned" but never knows if it finished.
@@ -51,13 +39,7 @@ The project implements a basic distributed task scheduler using Netty for commun
 - **Impact:** High task volume will exhaust system threads/memory (Thread starvation).
 - **Fix:** Use a `ExecutorService` (e.g., `Executors.newFixedThreadPool`) to manage a worker pool.
 
-### 3.2 String Encoding Bug
-**File:** `message-protocol/.../Message.java`
-- **Issue:** `message.setContentLength(contentStr.length());` vs `contentStr.getBytes()`.
-- **Impact:** `String.length()` returns character count, not byte count. For multi-byte characters (UTF-8), the length will be wrong, causing the decoder to read incorrect frame sizes and corrupting the stream.
-- **Fix:** Use `byte[] bytes = contentStr.getBytes(StandardCharsets.UTF_8);` and `bytes.length`.
-
-### 3.3 Efficient Byte Decoding
+### 3.2 Efficient Byte Decoding
 **File:** `message-protocol/.../MessageDecoderNetty.java`
 - **Suggestion:** `ReplayingDecoder` is slower than `ByteToMessageDecoder` due to exception handling overhead. Standard Netty length-field based decoders should be preferred.
 
@@ -70,8 +52,5 @@ The project implements a basic distributed task scheduler using Netty for commun
 
 ## Recommended Next Steps
 
-1.  **Fix Critical Crashes:** Add checks for empty worker lists in `WorkerSelector`.
-2.  **Fix Protocol Bug:** Fix the string length calculation in `Message.java`.
-3.  **Implement Load Balancing:** Wire up `MonitoringService` to send stats in heartbeats.
-4.  **Replace Serialization:** Switch from `ObjectInputStream` to JSON.
-5.  **Thread Pool:** Replace `new Thread()` with a thread pool in `TaskRunner`.
+1.  **Replace Serialization:** Switch from `ObjectInputStream` to JSON.
+2.  **Thread Pool:** Replace `new Thread()` with a thread pool in `TaskRunner`.
