@@ -2,7 +2,9 @@ package com.messageprotocol;
 
 public enum MessageType {
     PING,
-    TASK;
+    PONG,
+    TASK, 
+    MONITOR_INFO;
 
 
     public int getValue() {

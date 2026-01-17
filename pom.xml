@@ -12,6 +12,8 @@
         <module>message-protocol</module>
         <module>server</module>
         <module>client</module>
+        <module>java-task-runner</module>
+        <module>task-api</module>
     </modules>
 
     <properties>
@@ -26,6 +28,16 @@
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
             <version>4.2.9.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.36</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.36</version>
         </dependency>
     </dependencies>
 

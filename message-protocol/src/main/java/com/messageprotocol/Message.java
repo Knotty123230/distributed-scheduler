@@ -29,6 +29,15 @@ public class Message {
         this.content = content;
     }
 
+
+    public static Message contentFromBytes(byte[] contentBytes, MessageType messageType) {
+        Message message = new Message();
+        message.setMessageType(messageType);
+        message.setContentLength(contentBytes.length);
+        message.setContent(contentBytes);
+        return message;
+    }
+
     public static Message contentFromString(String contentStr, MessageType messageType) {
         Message message = new Message();
         message.setMessageType(messageType);
